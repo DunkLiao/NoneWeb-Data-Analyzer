@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
+import { useTheme } from '../../context/ThemeContext';
 
 interface EChartWrapperProps {
   option: echarts.EChartsOption;
@@ -18,12 +19,13 @@ export const EChartWrapper: React.FC<EChartWrapperProps> = ({
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!chartRef.current) return;
 
-    // Initialize chart
-    const chart = echarts.init(chartRef.current, 'dark', {
+    // Initialize chart with light or dark theme
+    const chart = echarts.init(chartRef.current, theme === 'dark' ? 'dark' : undefined, {
       renderer: 'canvas',
     });
     chartInstance.current = chart;
@@ -33,6 +35,12 @@ export const EChartWrapper: React.FC<EChartWrapperProps> = ({
         chart.on(eventName, handler);
       });
     }
+
+    const finalOption: echarts.EChartsOption = {
+      backgroundColor: 'transparent',
+      ...option,
+    };
+    chart.setOption(finalOption, true);
 
     const resizeObserver = new ResizeObserver(() => {
       chart.resize();
@@ -44,11 +52,10 @@ export const EChartWrapper: React.FC<EChartWrapperProps> = ({
       chart.dispose();
       chartInstance.current = null;
     };
-  }, []);
+  }, [theme]); // Re-initialize when theme changes
 
   useEffect(() => {
     if (chartInstance.current) {
-      // Merge base dark background transparently
       const finalOption: echarts.EChartsOption = {
         backgroundColor: 'transparent',
         ...option,

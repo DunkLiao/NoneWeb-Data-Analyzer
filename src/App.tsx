@@ -4,6 +4,7 @@ import { parseFile } from './utils/parser';
 import { calcOverallMissing, calcColumnMissingStats, generateNullityMatrix, calcNullityCorrelation } from './utils/missingAnalysis';
 import { generateSampleDataset } from './utils/sampleData';
 import { exportHtmlReport } from './utils/exportReport';
+import { useTheme } from './context/ThemeContext';
 
 // Components
 import { FileUploader } from './components/FileUploader';
@@ -28,6 +29,8 @@ import {
   Download,
   Flame,
   Home,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 export function App() {
@@ -36,6 +39,7 @@ export function App() {
   const [selectedColumn, setSelectedColumn] = useState<string>('');
   const [isCleanerOpen, setIsCleanerOpen] = useState(false);
   const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const { toggleTheme, isDark } = useTheme();
 
   // Return to home screen
   const handleGoHome = () => {
@@ -113,10 +117,15 @@ export function App() {
     return dataset.columns.filter((c) => dataset.columnTypes[c] === 'numeric');
   }, [dataset]);
 
+  const categoricalColumns = useMemo(() => {
+    if (!dataset) return [];
+    return dataset.columns.filter((c) => dataset.columnTypes[c] !== 'numeric');
+  }, [dataset]);
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white transition-colors duration-200">
       {/* Top Navigation Bar */}
-      <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-40 px-6 py-3 flex items-center justify-between">
+      <header className="border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md sticky top-0 z-40 px-6 py-3 flex items-center justify-between shadow-xs transition-colors">
         <div
           onClick={handleGoHome}
           className="flex items-center gap-3 cursor-pointer select-none group"
@@ -127,45 +136,61 @@ export function App() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold text-slate-100 tracking-tight group-hover:text-blue-400 transition-colors">
+              <h1 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 NoneWeb Data Analyzer
               </h1>
-              <span className="text-[10px] font-semibold bg-blue-950/80 text-blue-400 border border-blue-800/60 px-2 py-0.5 rounded-md">
+              <span className="text-[10px] font-semibold bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60 px-2 py-0.5 rounded-md">
                 免安裝綠色版
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 group-hover:text-slate-300 transition-colors">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">
               高效能離線資料缺失值與分布統計分析器
             </p>
           </div>
         </div>
 
-        {dataset && (
-          <div className="flex items-center gap-2 text-xs">
-            <button
-              onClick={handleGoHome}
-              className="px-3 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 flex items-center gap-1.5 font-medium transition-all"
-              title="回到首頁"
-            >
-              <Home className="w-3.5 h-3.5" />
-              回到首頁
-            </button>
-            <button
-              onClick={() => setIsCleanerOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 flex items-center gap-1.5 font-medium transition-all"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              缺失清洗與補值
-            </button>
-            <button
-              onClick={() => exportHtmlReport(dataset)}
-              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1.5 font-medium shadow-sm transition-all"
-            >
-              <Download className="w-3.5 h-3.5" />
-              匯出診斷報告 (HTML)
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2 text-xs">
+          {dataset && (
+            <>
+              <button
+                onClick={handleGoHome}
+                className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700/60 flex items-center gap-1.5 font-medium transition-all"
+                title="回到首頁"
+              >
+                <Home className="w-3.5 h-3.5" />
+                回到首頁
+              </button>
+              <button
+                onClick={() => setIsCleanerOpen(true)}
+                className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-600/20 hover:bg-indigo-100 dark:hover:bg-indigo-600/30 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/40 flex items-center gap-1.5 font-medium transition-all"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                缺失清洗與補值
+              </button>
+              <button
+                onClick={() => exportHtmlReport(dataset)}
+                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1.5 font-medium shadow-sm transition-all"
+              >
+                <Download className="w-3.5 h-3.5" />
+                匯出診斷報告 (HTML)
+              </button>
+            </>
+          )}
+
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 transition-all ml-1"
+            title={isDark ? '切換為淺色模式 (Light Mode)' : '切換為深色模式 (Dark Mode)'}
+            aria-label="Toggle theme"
+          >
+            {isDark ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4 text-slate-600" />
+            )}
+          </button>
+        </div>
       </header>
 
       {/* Main Container */}
@@ -189,13 +214,13 @@ export function App() {
             <OverviewMetrics dataset={dataset} overall={overall} />
 
             {/* View Tabs */}
-            <div className="flex items-center border-b border-slate-800 mb-6 gap-2 text-xs font-semibold">
+            <div className="flex items-center border-b border-slate-200 dark:border-slate-800 mb-6 gap-2 text-xs font-semibold overflow-x-auto">
               <button
                 onClick={() => setActiveTab('missing')}
-                className={`pb-3 px-3 flex items-center gap-2 border-b-2 transition-all ${
+                className={`pb-3 px-3 flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
                   activeTab === 'missing'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 <Layers className="w-4 h-4" />
@@ -204,10 +229,10 @@ export function App() {
 
               <button
                 onClick={() => setActiveTab('distribution')}
-                className={`pb-3 px-3 flex items-center gap-2 border-b-2 transition-all ${
+                className={`pb-3 px-3 flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
                   activeTab === 'distribution'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 <PieChart className="w-4 h-4" />
@@ -216,22 +241,22 @@ export function App() {
 
               <button
                 onClick={() => setActiveTab('correlation')}
-                className={`pb-3 px-3 flex items-center gap-2 border-b-2 transition-all ${
+                className={`pb-3 px-3 flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
                   activeTab === 'correlation'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 <Flame className="w-4 h-4" />
-                相關性矩陣 (Correlation Heatmap)
+                相關性矩陣與多變量 (Correlation & 4D)
               </button>
 
               <button
                 onClick={() => setActiveTab('grid')}
-                className={`pb-3 px-3 flex items-center gap-2 border-b-2 transition-all ${
+                className={`pb-3 px-3 flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
                   activeTab === 'grid'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 <Grid className="w-4 h-4" />
@@ -266,17 +291,17 @@ export function App() {
                 </div>
                 <div className="md:col-span-3">
                   {selectedColumn && (
-                    <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                    <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+                      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-bold text-slate-100">{selectedColumn}</h3>
-                            <span className="text-xs bg-slate-800 px-2 py-0.5 rounded text-slate-300 font-mono">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">{selectedColumn}</h3>
+                            <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300 font-mono">
                               {dataset.columnTypes[selectedColumn]}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400 mt-0.5">
-                            單變量統計特徵與機率密度視覺化
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            單變量統計特徵、機率密度、常態檢驗與分佈視覺化
                           </p>
                         </div>
                       </div>
@@ -304,6 +329,7 @@ export function App() {
                 <CorrelationMatrixView
                   rows={dataset.rows}
                   numericColumns={numericColumns}
+                  categoricalColumns={categoricalColumns}
                 />
               </div>
             )}
@@ -324,33 +350,33 @@ export function App() {
         {/* Empty state welcome card when no file is loaded */}
         {!dataset && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
-              <div className="p-2.5 rounded-lg bg-blue-600/10 text-blue-400 w-fit mb-3">
+            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-xs">
+              <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-600/10 text-blue-600 dark:text-blue-400 w-fit mb-3">
                 <Layers className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-semibold text-slate-200 mb-1">直觀缺失矩陣 (Missingno)</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                自動將資料缺失樣態轉化為黑紅白條紋矩陣，一眼看穿感測器斷訊、週期性掉值或頭尾遺失規律。
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">直觀缺失矩陣 (Missingno)</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                自動將資料缺失樣態轉化為黑白紅條紋矩陣，一眼看穿感測器斷訊、週期性掉值或頭尾遺失規律。
               </p>
             </div>
 
-            <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
-              <div className="p-2.5 rounded-lg bg-indigo-600/10 text-indigo-400 w-fit mb-3">
+            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-xs">
+              <div className="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 w-fit mb-3">
                 <PieChart className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-semibold text-slate-200 mb-1">專業分布與箱線圖</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                直方圖、KDE 核密度曲線、五數概括與 IQR 異常離群值偵測，支援動態滑桿即時調節分箱數。
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">豐富專業圖形庫 (10+ 種)</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                直方圖、KDE、箱線圖、常態 Q-Q 圖、二八法則柏拉圖、Treemap、四維氣泡圖與特徵雷達圖。
               </p>
             </div>
 
-            <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-5">
-              <div className="p-2.5 rounded-lg bg-emerald-600/10 text-emerald-400 w-fit mb-3">
+            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 shadow-xs">
+              <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 w-fit mb-3">
                 <FileText className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-semibold text-slate-200 mb-1">離線免安裝與報告匯出</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                零安裝依賴、本地完全離線計算、支援繁體中文 Big5 自動解碼，一鍵產出自包含 HTML 診斷報告。
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">深淺色切換與報告匯出</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                支援全站深淺色主題切換、完全離線本機計算、繁體中文 Big5 自動解碼，一鍵產出診斷報告。
               </p>
             </div>
           </div>
@@ -371,7 +397,7 @@ export function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 py-4 px-6 text-center text-[11px] text-slate-500">
+      <footer className="border-t border-slate-200 dark:border-slate-900 py-4 px-6 text-center text-[11px] text-slate-500">
         NoneWeb Data Analyzer &copy; 2026 - 離線可攜式資料品質診斷工具
       </footer>
     </div>

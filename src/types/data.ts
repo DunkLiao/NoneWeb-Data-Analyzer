@@ -28,6 +28,20 @@ export interface HistogramBin {
   count: number;
 }
 
+export interface QQPlotPoint {
+  theoretical: number;
+  sample: number;
+}
+
+export interface QQPlotData {
+  points: [number, number][];
+  line: [number, number][];
+  slope: number;
+  intercept: number;
+  rSquared: number;
+  normalityStatus: 'likely_normal' | 'moderate_deviation' | 'heavy_skewed';
+}
+
 export interface NumericStats {
   count: number;
   missing: number;
@@ -47,12 +61,21 @@ export interface NumericStats {
   histogram: HistogramBin[];
   kde: { x: number; y: number }[];
   cdf: { x: number; y: number }[];
+  qqPlot?: QQPlotData;
 }
 
 export interface CategoryFrequency {
   value: string;
   count: number;
   percentage: number;
+}
+
+export interface ParetoItem {
+  value: string;
+  count: number;
+  percentage: number;
+  cumCount: number;
+  cumPercentage: number;
 }
 
 export interface CategoricalStats {
@@ -62,6 +85,7 @@ export interface CategoricalStats {
   mode: string;
   modeCount: number;
   frequencies: CategoryFrequency[];
+  pareto: ParetoItem[];
 }
 
 export interface CorrelationMatrix {
@@ -73,6 +97,21 @@ export interface NullityMatrixData {
   columns: string[];
   sampleRows: number; // how many rows sampled if dataset is huge
   matrix: boolean[][]; // [row][col] is true if missing
+}
+
+export interface RadarMetric {
+  name: string;
+  max: number;
+}
+
+export interface RadarSeriesItem {
+  name: string;
+  value: number[];
+}
+
+export interface RadarData {
+  indicators: { name: string; max: number }[];
+  series: { name: string; value: number[] }[];
 }
 
 export interface ParsedDataset {
