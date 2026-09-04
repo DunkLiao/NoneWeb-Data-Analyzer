@@ -295,10 +295,10 @@ $$r_{xy} = \frac{\sum (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum (x_i - \bar{x})
 sequenceDiagram
     autonumber
     actor User as 使用者
-    participant UI as 前端介面 (App)
-    participant Parser as 解析核心 (Parser)
+    participant UI as 前端介面
+    participant Parser as 解析核心
     participant Engine as 統計計算引擎
-    participant Native as 原生系統 (Tauri/FS)
+    participant Native as 原生系統
 
     User->>UI: 拖曳或選取檔案 (CSV / TSV / Excel)
     UI->>Parser: 讀取檔案二進位資料

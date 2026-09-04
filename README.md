@@ -100,14 +100,14 @@ flowchart TD
 sequenceDiagram
     autonumber
     actor User as 使用者
-    participant App as NoneWeb 桌面端
+    participant App as NoneWeb桌面端
     participant Engine as 本地分析引擎
 
     User->>App: 拖入 CSV / Excel 檔案 (或點選示範資料)
     App->>Engine: 自動識別副檔名與字元編碼
     Engine-->>App: 完成解析並推論欄位型態 (數值/類別)
     App->>User: 呈現整體指標卡片與多分頁圖表
-    Note over User,App: 隨時可點擊左上角 LOGO 回到首頁
+    Note over User, App: 隨時可點擊左上角 LOGO 回到首頁
 ```
 
 ---
