@@ -29,3 +29,5 @@ tauri = { version = "2.11.3", features = [] }
 tauri-plugin-log = "2"
 rfd = "0.15"
 base64 = "0.22"
+rusqlite = { version = "0.32", features = ["bundled"] }
+oracledb = "26.0.0-beta.2"

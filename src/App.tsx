@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
-import type { ActiveTab, ParsedDataset } from './types/data';
-import { parseFile } from './utils/parser';
+import type { ActiveTab, ParsedDataset, ColumnType } from './types/data';
+import type { DbQueryResult } from './types/database';
+import { parseFile, inferColumnType, isValueMissing } from './utils/parser';
 import { calcOverallMissing, calcColumnMissingStats, generateNullityMatrix, calcNullityCorrelation } from './utils/missingAnalysis';
 import { generateSampleDataset } from './utils/sampleData';
 import { exportHtmlReport } from './utils/exportReport';
@@ -13,6 +14,7 @@ import { MissingMatrix } from './components/MissingValueTab/MissingMatrix';
 import { MissingBarChart } from './components/MissingValueTab/MissingBarChart';
 import { MissingCorrelation } from './components/MissingValueTab/MissingCorrelation';
 import { MissingCleanerModal } from './components/MissingValueTab/MissingCleanerModal';
+import { DatabaseModal } from './components/DatabaseModal/DatabaseModal';
 import { ColumnSelector } from './components/DistributionTab/ColumnSelector';
 import { NumericDistView } from './components/DistributionTab/NumericDistView';
 import { CategoryDistView } from './components/DistributionTab/CategoryDistView';
@@ -31,6 +33,7 @@ import {
   Home,
   Sun,
   Moon,
+  Database,
 } from 'lucide-react';
 
 export function App() {
@@ -38,6 +41,7 @@ export function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('missing');
   const [selectedColumn, setSelectedColumn] = useState<string>('');
   const [isCleanerOpen, setIsCleanerOpen] = useState(false);
+  const [isDbModalOpen, setIsDbModalOpen] = useState(false);
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const { toggleTheme, isDark } = useTheme();
 
@@ -88,6 +92,57 @@ export function App() {
       setDataset(parsed);
     } catch (err: any) {
       alert(`切換編碼失敗: ${err.message || err}`);
+    }
+  };
+
+  // Handle Database Query Result Loaded
+  const handleDbDataLoaded = (queryResult: DbQueryResult, sourceName: string) => {
+    try {
+      const { columns, rows, totalRows } = queryResult;
+      if (columns.length === 0 || rows.length === 0) {
+        alert('查詢結果為空，無法進行分析。');
+        return;
+      }
+
+      // Infer column types
+      const columnTypes: Record<string, ColumnType> = {};
+      columns.forEach((col) => {
+        const values = rows.map((r) => r[col]);
+        columnTypes[col] = inferColumnType(values);
+      });
+
+      // Sanitize rows
+      const sanitizedRows = rows.map((row) => {
+        const newRow: Record<string, any> = {};
+        columns.forEach((col) => {
+          const val = row[col];
+          if (isValueMissing(val)) {
+            newRow[col] = null;
+          } else if (columnTypes[col] === 'numeric') {
+            const num = Number(val);
+            newRow[col] = isNaN(num) ? null : num;
+          } else {
+            newRow[col] = String(val);
+          }
+        });
+        return newRow;
+      });
+
+      const parsed: ParsedDataset = {
+        filename: `${sourceName} (${totalRows.toLocaleString()} 筆)`,
+        fileSize: JSON.stringify(rows).length,
+        encoding: 'Database / Native UTF-8',
+        columns,
+        columnTypes,
+        rows: sanitizedRows,
+      };
+
+      setCurrentFile(null);
+      setDataset(parsed);
+      setSelectedColumn(columns[0] || '');
+      setActiveTab('missing');
+    } catch (err: any) {
+      alert(`載入資料庫資料失敗: ${err.message || err}`);
     }
   };
 
@@ -150,6 +205,15 @@ export function App() {
         </div>
 
         <div className="flex items-center gap-2 text-xs">
+          <button
+            onClick={() => setIsDbModalOpen(true)}
+            className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-600/20 hover:bg-indigo-100 dark:hover:bg-indigo-600/30 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/40 flex items-center gap-1.5 font-medium transition-all"
+            title="開啟 Oracle 或 SQLite 資料庫連線與 SQL 查詢"
+          >
+            <Database className="w-3.5 h-3.5" />
+            資料庫連線
+          </button>
+
           {dataset && (
             <>
               <button
@@ -206,6 +270,7 @@ export function App() {
           onSheetChanged={handleSheetChanged}
           onEncodingChanged={handleEncodingChanged}
           onLoadSample={handleLoadSample}
+          onOpenDatabase={() => setIsDbModalOpen(true)}
         />
 
         {dataset && overall && (
@@ -394,6 +459,13 @@ export function App() {
             }}
           />
         )}
+
+        {/* Database Connection & SQL Query Modal */}
+        <DatabaseModal
+          isOpen={isDbModalOpen}
+          onClose={() => setIsDbModalOpen(false)}
+          onDataLoaded={handleDbDataLoaded}
+        />
       </main>
 
       {/* Footer */}

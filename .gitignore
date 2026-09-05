@@ -48,3 +48,8 @@ $RECYCLE.BIN/
 # Temporary / Scratch scripts
 scratch/
 
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
