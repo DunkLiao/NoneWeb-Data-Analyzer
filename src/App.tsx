@@ -186,9 +186,11 @@ export function App() {
           className="flex items-center gap-3 cursor-pointer select-none group"
           title="點選回到首頁（重新選擇或上傳檔案）"
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-md shadow-blue-500/20 text-white font-black text-lg group-hover:scale-105 group-hover:shadow-blue-500/40 transition-all">
-            N
-          </div>
+          <img
+            src="/logo.png"
+            alt="Dunk's LOGO"
+            className="w-9 h-9 rounded-xl object-contain shadow-md shadow-blue-500/20 group-hover:scale-105 group-hover:shadow-blue-500/40 transition-all"
+          />
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
